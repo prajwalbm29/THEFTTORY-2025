@@ -1,0 +1,170 @@
+import axios from 'axios'
+import React, { useEffect, useState } from 'react'
+
+const Phone = () => {
+  const [openModel, setOpenModel] = useState(false)
+  const [selectedComplaintId, setSelectedComplaintId] = useState(null)
+
+  const [complaints, setComplaints] = useState([])
+  const [allocation, setAllocation] = useState([])
+  const [polices, setPolices] = useState([])
+
+  const getComplaints = async () => {
+    try {
+      const { data } = await axios.get('/api/v1/admin/fetch-phone-complaints')
+      if (data?.success) {
+        await filterResolved(data?.complaints.filter(complaint => complaint?.isVerified))
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  const filterResolved = async (complaints) => {
+    try {
+      const { data } = await axios.get('/api/v1/complaint/resolved-complaints')
+      if (data?.success) {
+        const resolvedIds = data?.resolvedComplaints.map(id => id.toString());
+        const filtered = complaints.filter(complaint => {
+          return !resolvedIds.includes(complaint._id.toString());
+        });
+        setComplaints(filtered);
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const fetchPolices = async () => {
+    try {
+      const { data } = await axios.get('/api/v1/admin/fetch-polices')
+      if (data?.success) {
+        setPolices(data?.polices.filter(police => police?.hasAccess))
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  const fetchAllocation = async () => {
+    try {
+      const { data } = await axios.get('/api/v1/admin/get-phone-complaint-allocation')
+      if (data?.success) {
+        setAllocation(data?.data)
+      }
+    } catch (error) {
+      console.error(error)
+    }
+  }
+
+  useEffect(() => {
+    getComplaints()
+    fetchPolices()
+    fetchAllocation()
+  }, [])
+
+  const handleCloseModel = async () => {
+    setOpenModel(false)
+    await fetchAllocation()
+  }
+
+  return (
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      <h1 className="text-2xl font-bold text-center mb-6 text-blue-400">📱 Cell Phone Complaints</h1>
+      <table className="w-full table-auto border border-gray-300 rounded-lg shadow-md">
+        <thead>
+          <tr className="bg-blue-100 text-left text-sm font-semibold text-gray-700">
+            <th className="px-4 py-2 border-b border-gray-300">IMEI Number</th>
+            <th className="px-4 py-2 border-b border-gray-300">Brand</th>
+            <th className="px-4 py-2 border-b border-gray-300">Model</th>
+            <th className="px-4 py-2 border-b border-gray-300">Lost Date</th>
+            <th className="px-4 py-2 border-b border-gray-300">Complaint Date</th>
+            <th className="px-4 py-2 border-b border-gray-300">Lost Location</th>
+          </tr>
+        </thead>
+        <tbody>
+          {complaints.map((complaint) => (
+            <tr
+              key={complaint._id}
+              className="cursor-pointer hover:bg-gray-100 text-sm transition"
+              onClick={() => {
+                setSelectedComplaintId(complaint._id)
+                setOpenModel(true)
+              }}
+            >
+              <td className="px-4 py-2 border-b border-gray-200">{complaint.imei}</td>
+              <td className="px-4 py-2 border-b border-gray-200">{complaint.brand}</td>
+              <td className="px-4 py-2 border-b border-gray-200">{complaint.model}</td>
+              <td className="px-4 py-2 border-b border-gray-200">
+                {new Date(complaint.lostDate).toLocaleDateString()}
+              </td>
+              <td className="px-4 py-2 border-b border-gray-200">
+                {new Date(complaint.complaintDate).toLocaleDateString()}
+              </td>
+              <td className="px-4 py-2 border-b border-gray-200">{complaint.lostLocation}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+
+      {openModel && selectedComplaintId && (
+        <AllocationModel
+          complaintId={selectedComplaintId}
+          polices={polices}
+          allocation={allocation}
+          onClose={handleCloseModel}
+        />
+      )}
+    </div>
+  )
+}
+
+const AllocationModel = ({ complaintId, polices, allocation, onClose }) => {
+  const [selected, setSelected] = useState([]);
+
+  useEffect(() => {
+    const found = allocation.find(item => item.phoneComplaintId === complaintId);
+    setSelected(found?.policeIds || []);
+  }, [complaintId, allocation]);
+
+  const togglePolice = async (policeId) => {
+    try {
+      await axios.patch('/api/v1/admin/update-phone-allocation', { policeId, cellComplaintId: complaintId });
+
+      setSelected(prev =>
+        prev.includes(policeId)
+          ? prev.filter(id => id !== policeId)
+          : [...prev, policeId]
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 backdrop-blur-sm bg-opacity-40 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-6 w-full max-w-2xl relative border border-gray-400">
+        <h2 className="text-xl font-semibold mb-4">Allocate Complaint</h2>
+        <button onClick={onClose} className="absolute top-2 right-4 text-2xl cursor-pointer">❌</button>
+
+        <div className="max-h-[400px] overflow-y-auto">
+          {polices.map(police => (
+            <div key={police._id} className="flex items-center justify-between border-b py-2">
+              <div>
+                <p className="font-medium">ID: {police.policeId}</p>
+                <p>Position: {police.position}</p>
+                <p>Station: {police.stationAddress}</p>
+              </div>
+              <input
+                type="checkbox"
+                checked={selected.includes(police._id)}
+                onChange={() => togglePolice(police._id)}
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Phone;
