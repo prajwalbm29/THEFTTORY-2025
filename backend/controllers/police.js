@@ -48,11 +48,13 @@ const changeComplaintStatusController = async (req, res) => {
         const { complaintId, status, description } = req.body
         const complaint = await statusModel.findOne({ complaintId })
         if (!complaint) {
-            await statusModel.create({
+            const newComplaint = await statusModel.create({
                 complaintId,
                 status: ['Registration', status],
                 description: ['Complaint registered successfully.', description]
             })
+            newComplaint.status.push(status)
+            newComplaint.description.push(description)
             return res.status(200).json({ success: true, message: 'status updated successfully.' })
         }
         complaint.status.push(status)

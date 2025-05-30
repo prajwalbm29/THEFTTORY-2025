@@ -1,5 +1,8 @@
-const { fetchDetailsController, generateOTPController, verifyOTPController, AdminRegisterController, AdminLoginController } = require('../controllers/auth')
+const { fetchDetailsController, generateOTPController, verifyOTPController, AdminRegisterController, AdminLoginController, policeDetailsController } = require('../controllers/auth')
 const router = require('express').Router()
+
+// police get details
+router.get('/police-details/:policeId', policeDetailsController)
 
 router.get('/get-details/:aadhaarNo', fetchDetailsController)
 router.get('/generate-otp/:aadhaarNo', generateOTPController)

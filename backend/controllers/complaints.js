@@ -9,6 +9,149 @@ const policeModel = require("../models/police");
 const resolvedComplaintModel = require("../models/resolvedComplaints");
 const statusModel = require("../models/status");
 
+const sendUpdateMailController = async (req, res) => {
+    try {
+        const { complaintId, status, description, type } = req.body
+        let userEmail = ''
+        let userName = ''
+        let brand_ = ''
+        let model_ = ''
+
+        switch (type) {
+            case 'phone':
+                try {
+                    const { aadhaarNo, brand, model } = await cellphoneModel.findById(complaintId);
+                    if (!aadhaarNo) {
+                        return res.status(404).json({ success: false, message: 'Complaint Not Found.' })
+                    }
+                    const { email, name } = await aadhaarDetails.findOne({ aadhaarNo });
+                    userEmail = email
+                    userName = name
+                    brand_ = brand
+                    model_ = model
+                    break
+                } catch (error) {
+                    console.error(error)
+                    return res.status(500).json({ success: false, message: error.message })
+                }
+            case 'laptop':
+                try {
+                    const { aadhaarNo, model, brand } = await laptopModel.findById(complaintId);
+                    if (!aadhaarNo) {
+                        return res.status(404).json({ success: false, message: 'Complaint Not Found.' })
+                    }
+                    const { email, name } = await aadhaarDetails.findOne({ aadhaarNo });
+                    userEmail = email
+                    userName = name
+                    model_ = model
+                    brand_ = brand
+                    break
+                } catch (error) {
+                    console.error(error)
+                    return res.status(500).json({ success: false, message: error.message })
+                }
+            case 'bike':
+                try {
+                    const { aadhaarNo, brand, model } = await bikeModel.findById(complaintId);
+                    if (!aadhaarNo) {
+                        return res.status(404).json({ success: false, message: 'Complaint Not Found.' })
+                    }
+                    const { email, name } = await aadhaarDetails.findOne({ aadhaarNo });
+                    userEmail = email
+                    userName = name
+                    brand_ = brand
+                    model_ = model
+                    break
+                } catch (error) {
+                    console.error(error)
+                    return res.status(500).json({ success: false, message: error.message })
+                }
+            case 'car':
+                try {
+                    const { aadhaarNo, brand, model } = await carModel.findById(complaintId);
+                    if (!aadhaarNo) {
+                        return res.status(404).json({ success: false, message: 'Complaint Not Found.' })
+                    }
+                    const { email, name } = await aadhaarDetails.findOne({ aadhaarNo });
+                    userEmail = email
+                    userName = name
+                    brand_ = brand
+                    model_ = model
+                    break
+                } catch (error) {
+                    console.error(error)
+                    return res.status(500).json({ success: false, message: error.message })
+                }
+            default:
+                try {
+                    const { aadhaarNo, weight } = await goldModel.findById(complaintId);
+                    if (!aadhaarNo) {
+                        return res.status(404).json({ success: false, message: 'Complaint Not Found.' })
+                    }
+                    const { email, name } = await aadhaarDetails.findOne({ aadhaarNo });
+                    userEmail = email
+                    userName = name
+                    brand_ = `${weight} grams`
+                    model_ = 'gold'
+                    break
+                } catch (error) {
+                    console.error(error)
+                    return res.status(500).json({ success: false, message: error.message })
+                }
+        }
+
+        const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+                user: process.env.EMAIL,
+                pass: process.env.PASSWORD,
+            },
+        });
+        // Email content
+        const message = {
+            from: process.env.EMAIL,
+            to: userEmail,
+            subject: `Complaint Status Update - ${complaintId}`,
+            html: `
+            <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6; max-width: 600px; margin: 0 auto;">
+                <div style="background: #1e90ff; padding: 20px; text-align: center;">
+                <h1 style="color: white; margin: 0;">Complaint Registered</h1>
+                </div>
+                
+                <div style="padding: 20px;">
+                <p><strong>Dear ${userName},</strong></p>
+
+                <p>Your complaint status regarding your <strong>${brand_} ${model_}</strong> 
+                 has been updated successfully with the following details:</p>
+                
+                <div style="background: #f8f9fa; border-left: 4px solid #1e90ff; padding: 15px; margin: 15px 0;">
+                    <p><strong>Complaint ID:</strong> ${complaintId}</p>
+                    <p><strong>Updated Status:</strong> ${status}</p>
+                    <p><strong>Updated Description:</strong> ${description}</p>
+                </div>
+
+                <p>You can track the status of your complaint through our mobile application at any time.</p>
+
+                <p>Our team will review your complaint and update you on any developments.</p>
+
+                <p style="margin-top: 30px;">Best regards,<br/>
+                <strong>The Thefttory Team</strong></p>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 10px; text-align: center; font-size: 12px; color: #666;">
+                <p>This is an automated message. Please do not reply directly to this email.</p>
+                </div>
+            </div>
+            `
+        };
+        await transporter.sendMail(message);
+        return res.status(200).json({ success: true, message: 'Notification sent successfully.' })
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({ success: false, message: error.message })
+    }
+}
+
 const cellComplaintController = async (req, res) => {
     try {
         const { complaintDetails } = req.body
@@ -21,43 +164,7 @@ const cellComplaintController = async (req, res) => {
             return res.status(404).json({ success: false, message: "Aadhaar number does not exist in database." })
         }
         const complaint = await cellphoneModel.create(complaintDetails)
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.PASSWORD,
-            },
-        });
-        // Email content
-        const message = {
-            from: process.env.EMAIL,
-            to: details.email,
-            subject: 'Complaint Registered',
-            html: `
-            <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-                <p><strong>Dear ${details.name},</strong></p>
-
-                <p>We are writing to confirm that your complaint regarding your <strong>${complaintDetails.brand} ${complaintDetails.model}</strong> has been <strong>successfully registered</strong>.</p>
-
-                <p>You can track the status of your complaint through the application at any time.</p>
-
-                <p><strong>Your Complaint ID:</strong></p>
-                <div style="background: #f4f4f4; padding: 10px; margin: 15px 0; 
-                    font-size: 24px; font-weight: bold; letter-spacing: 2px; 
-                    text-align: center;">
-                    ${complaint._id}
-                </div>
-
-                <p>Thank you for using our service.<br/>
-                We will keep you updated on any further developments.</p>
-
-                <p>Best regards,<br/>
-                <strong>The Thefttory Team</strong></p>
-            </div>
-            `
-        };
-        await transporter.sendMail(message);
-        return res.status(200).json({ success: true, message: "Complaint registered successfully." })
+        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id })
     } catch (error) {
         console.error('complaint registration failed', error);
         return res.status(500).json({ success: false, message: error.message });
@@ -75,43 +182,7 @@ const laptopComplaintController = async (req, res) => {
             return res.status(404).json({ success: false, message: "Aadhaar number does not exist in database." })
         }
         const complaint = await laptopModel.create(complaintDetails)
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.PASSWORD,
-            },
-        });
-        // Email content
-        const message = {
-            from: process.env.EMAIL,
-            to: details.email,
-            subject: 'Complaint Registered',
-            html: `
-            <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-                <p><strong>Dear ${details.name},</strong></p>
-
-                <p>We are writing to confirm that your complaint regarding your <strong>${complaintDetails.brand} ${complaintDetails.model}</strong> has been <strong>successfully registered</strong>.</p>
-
-                <p>You can track the status of your complaint through the application at any time.</p>
-
-                <p><strong>Your Complaint ID:</strong></p>
-                <div style="background: #f4f4f4; padding: 10px; margin: 15px 0; 
-                    font-size: 24px; font-weight: bold; letter-spacing: 2px; 
-                    text-align: center;">
-                    ${complaint._id}
-                </div>
-
-                <p>Thank you for using our service.<br/>
-                We will keep you updated on any further developments.</p>
-
-                <p>Best regards,<br/>
-                <strong>The Thefttory Team</strong></p>
-            </div>
-            `
-        };
-        await transporter.sendMail(message);
-        return res.status(200).json({ success: true, message: "Complaint registered successfully." })
+        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id })
     } catch (error) {
         console.error('complaint registration failed', error);
         return res.status(500).json({ success: false, message: error.message });
@@ -120,52 +191,23 @@ const laptopComplaintController = async (req, res) => {
 const bikeComplaintController = async (req, res) => {
     try {
         const complaintDetails = req.body
-        const existingComplaint = await bikeModel.findOne({ registrationNo: complaintDetails.registrationNo })
+        const existingComplaint = await bikeModel.findOne({
+            $or: [
+                { registrationNo: complaintDetails.registrationNo },
+                { chasisNo: complaintDetails.chasisNo },
+                { engineNo: complaintDetails.engineNo }
+            ]
+        });
         if (existingComplaint) {
             return res.status(200).json({ success: false, message: "Complaint already registered." })
         }
         const details = await aadhaarDetails.findOne({ aadhaarNo: complaintDetails.aadhaarNo })
         if (!details) {
+            console.log('AahaarNo',complaintDetails.aadhaarNo)
             return res.status(404).json({ success: false, message: "Aadhaar number does not exist in database." })
         }
         const complaint = await bikeModel.create(complaintDetails)
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.PASSWORD,
-            },
-        });
-        // Email content
-        const message = {
-            from: process.env.EMAIL,
-            to: details.email,
-            subject: 'Complaint Registered',
-            html: `
-            <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-                <p><strong>Dear ${details.name},</strong></p>
-
-                <p>We are writing to confirm that your complaint regarding your <strong>${complaintDetails.brand} ${complaintDetails.model}</strong> has been <strong>successfully registered</strong>.</p>
-
-                <p>You can track the status of your complaint through the application at any time.</p>
-
-                <p><strong>Your Complaint ID:</strong></p>
-                <div style="background: #f4f4f4; padding: 10px; margin: 15px 0; 
-                    font-size: 24px; font-weight: bold; letter-spacing: 2px; 
-                    text-align: center;">
-                    ${complaint._id}
-                </div>
-
-                <p>Thank you for using our service.<br/>
-                We will keep you updated on any further developments.</p>
-
-                <p>Best regards,<br/>
-                <strong>The Thefttory Team</strong></p>
-            </div>
-            `
-        };
-        await transporter.sendMail(message);
-        return res.status(200).json({ success: true, message: "Complaint registered successfully." })
+        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._idF })
     } catch (error) {
         console.error('complaint registration failed', error);
         return res.status(500).json({ success: false, message: error.message });
@@ -174,7 +216,13 @@ const bikeComplaintController = async (req, res) => {
 const carComplaintController = async (req, res) => {
     try {
         const { complaintDetails } = req.body
-        const existingComplaint = await carModel.findOne({ registrationNo: complaintDetails.registrationNo })
+        const existingComplaint = await bikeModel.findOne({
+            $or: [
+                { registrationNo: complaintDetails.registrationNo },
+                { chasisNo: complaintDetails.chasisNo },
+                { engineNo: complaintDetails.engineNo }
+            ]
+        });
         if (existingComplaint) {
             return res.status(200).json({ success: false, message: "Complaint already registered." })
         }
@@ -183,43 +231,7 @@ const carComplaintController = async (req, res) => {
             return res.status(404).json({ success: false, message: "Aadhaar number does not exist in database." })
         }
         const complaint = await carModel.create(complaintDetails)
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.PASSWORD,
-            },
-        });
-        // Email content
-        const message = {
-            from: process.env.EMAIL,
-            to: details.email,
-            subject: 'Complaint Registered',
-            html: `
-            <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-                <p><strong>Dear ${details.name},</strong></p>
-
-                <p>We are writing to confirm that your complaint regarding your <strong>${complaintDetails.brand} ${complaintDetails.model}</strong> has been <strong>successfully registered</strong>.</p>
-
-                <p>You can track the status of your complaint through the application at any time.</p>
-
-                <p><strong>Your Complaint ID:</strong></p>
-                <div style="background: #f4f4f4; padding: 10px; margin: 15px 0; 
-                    font-size: 24px; font-weight: bold; letter-spacing: 2px; 
-                    text-align: center;">
-                    ${complaint._id}
-                </div>
-
-                <p>Thank you for using our service.<br/>
-                We will keep you updated on any further developments.</p>
-
-                <p>Best regards,<br/>
-                <strong>The Thefttory Team</strong></p>
-            </div>
-            `
-        };
-        await transporter.sendMail(message);
-        return res.status(200).json({ success: true, message: "Complaint registered successfully." })
+        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id })
     } catch (error) {
         console.error('complaint registration failed', error);
         return res.status(500).json({ success: false, message: error.message });
@@ -237,43 +249,7 @@ const goldComplaintController = async (req, res) => {
             return res.status(404).json({ success: false, message: "Aadhaar number does not exist in database." })
         }
         const complaint = await goldModel.create(complaintDetails)
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL,
-                pass: process.env.PASSWORD,
-            },
-        });
-        // Email content
-        const message = {
-            from: process.env.EMAIL,
-            to: details.email,
-            subject: 'Complaint Registered',
-            html: `
-            <div style="font-family: Arial, sans-serif; color: #333; line-height: 1.6;">
-                <p><strong>Dear ${details.name},</strong></p>
-
-                <p>We are writing to confirm that your complaint regarding your <strong>${complaintDetails.brand} ${complaintDetails.model}</strong> has been <strong>successfully registered</strong>.</p>
-
-                <p>You can track the status of your complaint through the application at any time.</p>
-
-                <p><strong>Your Complaint ID:</strong></p>
-                <div style="background: #f4f4f4; padding: 10px; margin: 15px 0; 
-                    font-size: 24px; font-weight: bold; letter-spacing: 2px; 
-                    text-align: center;">
-                    ${complaint._id}
-                </div>
-
-                <p>Thank you for using our service.<br/>
-                We will keep you updated on any further developments.</p>
-
-                <p>Best regards,<br/>
-                <strong>The Thefttory Team</strong></p>
-            </div>
-            `
-        };
-        await transporter.sendMail(message);
-        return res.status(200).json({ success: true, message: "Complaint registered successfully." })
+        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id })
     } catch (error) {
         console.error('complaint registration failed', error);
         return res.status(500).json({ success: false, message: error.message });
@@ -471,5 +447,6 @@ module.exports = {
     goldDetailsController,
     phoneInvoiceController,
     laptopInvoiceController,
-    goldPhotoController
+    goldPhotoController,
+    sendUpdateMailController
 }

@@ -1,4 +1,4 @@
-const { cellComplaintController, laptopComplaintController, bikeComplaintController, carComplaintController, goldComplaintController, getCountController, getResolvedComplaints, phoneDetailsController, complaintStatusController, laptopDetailsController, bikeDetailsController, carDetailsController, goldDetailsController, phoneInvoiceController, laptopInvoiceController, goldPhotoController } = require('../controllers/complaints')
+const { cellComplaintController, laptopComplaintController, bikeComplaintController, carComplaintController, goldComplaintController, getCountController, getResolvedComplaints, phoneDetailsController, complaintStatusController, laptopDetailsController, bikeDetailsController, carDetailsController, goldDetailsController, phoneInvoiceController, laptopInvoiceController, goldPhotoController, sendUpdateMailController } = require('../controllers/complaints')
 const { requireSignIn, isAdmin } = require('../middlewares/auth')
 
 const router = require('express').Router()
@@ -24,5 +24,8 @@ router.get('/complaint-status/:complaintId', requireSignIn, complaintStatusContr
 router.get('/phone-invoice/:id', requireSignIn, phoneInvoiceController)
 router.get('/laptop-invoice/:id', requireSignIn, laptopInvoiceController)
 router.get('/gold-photo/:id', requireSignIn, goldPhotoController)
+
+// send update mail
+router.post('/update-mail', sendUpdateMailController)
 
 module.exports = router

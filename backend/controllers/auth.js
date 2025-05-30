@@ -4,7 +4,9 @@ const bcrypt = require('bcrypt')
 const nodemailer = require('nodemailer')
 const jwt = require('jsonwebtoken')
 const adminModel = require('../models/admin')
+const policeModel = require('../models/police')
 
+// admin and public details
 const fetchDetailsController = async (req, res) => {
     const { aadhaarNo } = req.params;
     try {
@@ -12,6 +14,21 @@ const fetchDetailsController = async (req, res) => {
         return res.status(200).json({ success: true, message: "Details fetched successfully.", data: { name, dob } })
     } catch (error) {
         console.error(`Error in fetching details ${str(error)}`)
+        return res.status(500).json({ success: false, message: error.message })
+    }
+}
+// police details
+const policeDetailsController = async (req, res) => {
+    const { policeId } = req.params
+    try {
+        const police = await policeModel.findOne({ policeId })
+        if (!police || !police.hasAccess) {
+            return res.status(401).json({ success: false, message: "You have don't have access to the complaints." })
+        }
+        const { name, dob } = await aadhaarDetails.findOne({ aadhaarNo: police.aadhaarNo })
+        return res.status(200).json({ success: true, message: "Details fetched successfully.", data: { name, dob, aadhaarNo: police.aadhaarNo } })
+    } catch (error) {
+        console.error(error)
         return res.status(500).json({ success: false, message: error.message })
     }
 }
@@ -68,7 +85,6 @@ const generateOTPController = async (req, res) => {
         return res.status(500).json({ success: false, message: error.message })
     }
 }
-
 const verifyOTPController = async (req, res) => {
     const { aadhaarNo, otp } = req.body;
     try {
@@ -80,7 +96,7 @@ const verifyOTPController = async (req, res) => {
         if (!isVerified || Date.now() > otpData.expiresAt.getTime()) {
             return res.status(401).json({ success: false, message: "Invalid or expired OTP." })
         }
-        const adminDetails = await adminModel.findOne({aadhaarNo});
+        const adminDetails = await adminModel.findOne({ aadhaarNo });
         let isAdmin = false
         if (adminDetails) {
             isAdmin = true
@@ -112,7 +128,6 @@ const AdminRegisterController = async (req, res) => {
         return res.status(500).json({ success: false, message: error.message });
     }
 }
-
 const AdminLoginController = async (req, res) => {
     const { aadhaarNo, password } = req.body;
     try {
@@ -137,4 +152,5 @@ module.exports = {
     verifyOTPController,
     AdminRegisterController,
     AdminLoginController,
+    policeDetailsController
 }

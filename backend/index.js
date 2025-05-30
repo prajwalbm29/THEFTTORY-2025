@@ -15,7 +15,7 @@ const corsOptions = {
     credentials: true
 }
 app.use(cors(corsOptions))
-app.use(express.json())
+app.use(express.json({ limit: '5mb' }))
 
 app.use('/api/v1/auth', require('./routes/auth'))
 app.use('/api/v1/admin', require('./routes/admin'))
