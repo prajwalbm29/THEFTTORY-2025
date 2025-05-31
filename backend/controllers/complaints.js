@@ -164,7 +164,7 @@ const cellComplaintController = async (req, res) => {
             return res.status(404).json({ success: false, message: "Aadhaar number does not exist in database." })
         }
         const complaint = await cellphoneModel.create(complaintDetails)
-        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id })
+        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id.toString() })
     } catch (error) {
         console.error('complaint registration failed', error);
         return res.status(500).json({ success: false, message: error.message });
@@ -182,7 +182,7 @@ const laptopComplaintController = async (req, res) => {
             return res.status(404).json({ success: false, message: "Aadhaar number does not exist in database." })
         }
         const complaint = await laptopModel.create(complaintDetails)
-        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id })
+        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id.toString() })
     } catch (error) {
         console.error('complaint registration failed', error);
         return res.status(500).json({ success: false, message: error.message });
@@ -190,7 +190,7 @@ const laptopComplaintController = async (req, res) => {
 }
 const bikeComplaintController = async (req, res) => {
     try {
-        const complaintDetails = req.body
+        const { complaintDetails } = req.body
         const existingComplaint = await bikeModel.findOne({
             $or: [
                 { registrationNo: complaintDetails.registrationNo },
@@ -203,11 +203,10 @@ const bikeComplaintController = async (req, res) => {
         }
         const details = await aadhaarDetails.findOne({ aadhaarNo: complaintDetails.aadhaarNo })
         if (!details) {
-            console.log('AahaarNo',complaintDetails.aadhaarNo)
             return res.status(404).json({ success: false, message: "Aadhaar number does not exist in database." })
         }
         const complaint = await bikeModel.create(complaintDetails)
-        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._idF })
+        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id.toString() })
     } catch (error) {
         console.error('complaint registration failed', error);
         return res.status(500).json({ success: false, message: error.message });
@@ -216,7 +215,7 @@ const bikeComplaintController = async (req, res) => {
 const carComplaintController = async (req, res) => {
     try {
         const { complaintDetails } = req.body
-        const existingComplaint = await bikeModel.findOne({
+        const existingComplaint = await carModel.findOne({
             $or: [
                 { registrationNo: complaintDetails.registrationNo },
                 { chasisNo: complaintDetails.chasisNo },
@@ -231,7 +230,7 @@ const carComplaintController = async (req, res) => {
             return res.status(404).json({ success: false, message: "Aadhaar number does not exist in database." })
         }
         const complaint = await carModel.create(complaintDetails)
-        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id })
+        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id.toString() })
     } catch (error) {
         console.error('complaint registration failed', error);
         return res.status(500).json({ success: false, message: error.message });
@@ -240,16 +239,12 @@ const carComplaintController = async (req, res) => {
 const goldComplaintController = async (req, res) => {
     try {
         const { complaintDetails } = req.body
-        const existingComplaint = await goldModel.findOne({ aadhaarNo: complaintDetails.aadhaarNo })
-        if (existingComplaint) {
-            return res.status(200).json({ success: false, message: "Complaint already registered." })
-        }
         const details = await aadhaarDetails.findOne({ aadhaarNo: complaintDetails.aadhaarNo })
         if (!details) {
             return res.status(404).json({ success: false, message: "Aadhaar number does not exist in database." })
         }
         const complaint = await goldModel.create(complaintDetails)
-        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id })
+        return res.status(200).json({ success: true, message: "Complaint registered successfully.", complaintId: complaint._id.toString() })
     } catch (error) {
         console.error('complaint registration failed', error);
         return res.status(500).json({ success: false, message: error.message });
@@ -430,6 +425,40 @@ const goldPhotoController = async (req, res) => {
     }
 }
 
+// Get All Complaints By Aadhaar Number
+const getAllComplaintsController = async (req, res) => {
+    try {
+        const { aadhaarNo } = req.params;
+
+        if (!aadhaarNo || !/^\d{12}$/.test(aadhaarNo)) {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid Aadhaar number (must be 12 digits)."
+            });
+        }
+
+        // Fetch all complaints in parallel
+        const [phone, laptop, bike, car, gold] = await Promise.all([
+            cellphoneModel.find({ aadhaarNo }).select("imei brand model complaintDate").lean(),
+            laptopModel.find({ aadhaarNo }).select("serialNo brand model complaintDate").lean(),
+            bikeModel.find({ aadhaarNo }).select("registrationNo brand model complaintDate").lean(),
+            carModel.find({ aadhaarNo }).select("registrationNo brand model complaintDate").lean(),
+            goldModel.find({ aadhaarNo }).select("weight uniqueFeature complaintDate").lean()
+        ]);
+
+        return res.status(200).json({
+            success: true,
+            data: { phone, laptop, bike, car, gold }
+        });
+
+    } catch (error) {
+        console.error("Error fetching complaints by Aadhaar:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server error. Please try again later."
+        });
+    }
+};
 
 module.exports = {
     cellComplaintController,
@@ -448,5 +477,6 @@ module.exports = {
     phoneInvoiceController,
     laptopInvoiceController,
     goldPhotoController,
-    sendUpdateMailController
+    sendUpdateMailController,
+    getAllComplaintsController
 }

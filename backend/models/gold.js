@@ -7,7 +7,7 @@ const goldSchema = new mongoose.Schema({
     lostDate: { type: String, required: true },
     weight: { type: Number, required: true },
     uniqueFeature: { type: String, required: true },
-    photo: {
+    invoice: {
         name: {
             type: String,
             required: true,

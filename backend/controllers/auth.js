@@ -69,8 +69,6 @@ const generateOTPController = async (req, res) => {
                     <p>If you didn't request this OTP, please ignore this email or contact support.</p>
                     <hr>
                     <p style="font-size: 12px; color: #777;">regards, Thefttory Security Team</p>
-                    <p style="font-size: 12px>prajwalbm90@gmail.com</p>
-                    <p style="font-size: 12px>7676085461</p>
                 </div>
             `,
         };
