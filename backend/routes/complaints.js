@@ -1,4 +1,4 @@
-const { cellComplaintController, laptopComplaintController, bikeComplaintController, carComplaintController, goldComplaintController, getCountController, getResolvedComplaints, phoneDetailsController, complaintStatusController, laptopDetailsController, bikeDetailsController, carDetailsController, goldDetailsController, phoneInvoiceController, laptopInvoiceController, goldPhotoController, sendUpdateMailController, getAllComplaintsController } = require('../controllers/complaints')
+const { cellComplaintController, laptopComplaintController, bikeComplaintController, carComplaintController, goldComplaintController, getCountController, getResolvedComplaints, phoneDetailsController, complaintStatusController, laptopDetailsController, bikeDetailsController, carDetailsController, goldDetailsController, phoneInvoiceController, laptopInvoiceController, goldPhotoController, sendUpdateMailController, getAllComplaintsController, getSafetyTipsController } = require('../controllers/complaints')
 const { requireSignIn, isAdmin } = require('../middlewares/auth')
 
 const router = require('express').Router()
@@ -30,5 +30,7 @@ router.post('/update-mail', sendUpdateMailController)
 
 // get all complaints by aadhaar number
 router.get('/get-all-complaints/:aadhaarNo', requireSignIn, getAllComplaintsController)
+
+router.get('/get-safetyTips', requireSignIn, getSafetyTipsController)
 
 module.exports = router

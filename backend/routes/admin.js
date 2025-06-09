@@ -20,7 +20,15 @@ const {
     activeOfficersController,
     totalResolvedComplaintsController,
     recentComplaintsController,
-    getPhoneComplaintAllocations
+    getPhoneComplaintAllocations,
+    getSafetyTipsController,
+    getUpdatesController,
+    updateSafetyTipsController,
+    updateUpdateTipsController,
+    deleteUpdateTipsController,
+    deleteSafetyTipsController,
+    addSafetyTipsController,
+    addUpdateTipsController
 } = require('../controllers/admin')
 const { requireSignIn, isAdmin } = require('../middlewares/auth')
 
@@ -60,5 +68,14 @@ router.get('/get-laptop-complaint-allocation', requireSignIn, isAdmin, getPhoneC
 router.get('/get-bike-complaint-allocation', requireSignIn, isAdmin, getPhoneComplaintAllocations)
 router.get('/get-car-complaint-allocation', requireSignIn, isAdmin, getPhoneComplaintAllocations)
 router.get('/get-gold-complaint-allocation', requireSignIn, isAdmin, getPhoneComplaintAllocations)
+
+// Updates and safety tips
+router.post('/add-safetyTips', requireSignIn, isAdmin, addSafetyTipsController)
+router.put('/update-safetyTips/:id', requireSignIn, isAdmin, updateSafetyTipsController)
+router.delete('/delete-safetyTips/:id', requireSignIn, isAdmin, deleteSafetyTipsController)
+
+router.post('/add-updateTips', requireSignIn, isAdmin, addUpdateTipsController)
+router.put('/update-updateTips/:id', requireSignIn, isAdmin, updateUpdateTipsController)
+router.delete('/delete-updateTips/:id', requireSignIn, isAdmin, deleteUpdateTipsController)
 
 module.exports = router

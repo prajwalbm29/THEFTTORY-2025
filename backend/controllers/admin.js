@@ -6,6 +6,8 @@ const goldModel = require('../models/gold');
 const policeComplaintsModel = require("../models/complaintAllocation");
 const policeModel = require("../models/police");
 const resolvedComplaintModel = require("../models/resolvedComplaints");
+const safetyTipsModel = require('../models/safetyTips');
+const updateTipsModel = require('../models/updates');
 
 const fetchPhoneComplaintsController = async (req, res) => {
     try {
@@ -418,6 +420,90 @@ const getPhoneComplaintAllocations = async (req, res) => {
     }
 };
 
+const addSafetyTipsController = async (req, res) => {
+    try {
+        const { tips } = req.body;
+        const existing = await safetyTipsModel.findOne({ tips });
+        if (existing) {
+            return res.status(400).json({ success: false, message: "Safety tip alredy exists" });
+        }
+        const newTip = await safetyTipsModel.create({
+            tips,
+        })
+        return res.status(201).json({ success: true, message: "Safety tip add successfully.", newTip });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: "Failed to add Safety tips." })
+    }
+}
+const addUpdateTipsController = async (req, res) => {
+    try {
+        const { update } = req.body;
+        const existing = await updateTipsModel.findOne({ update });
+        if (existing) {
+            return res.status(400).json({ success: false, message: "Police update alredy exists" });
+        }
+        const newUpdate = await updateTipsModel.create({
+            update,
+        })
+        return res.status(201).json({ success: true, message: "Police update added successfully.", newUpdate });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: "Failed to add Police update." })
+    }
+}
+const updateSafetyTipsController = async (req, res) => {
+    const { id } = req.params;
+    const { tips } = req.body;
+    try {
+        const existing = await safetyTipsModel.findById(id);
+        if (!existing) {
+            return res.status(404).json({ success: false, message: "Safety tips not found." });
+        }
+        existing.tips = tips;
+        await existing.save();
+        return res.status(200).json({ success: true, message: "Safety tips updated successfully." })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+const updateUpdateTipsController = async (req, res) => {
+    const { id } = req.params;
+    const { update } = req.body;
+    try {
+        const existing = await updateTipsModel.findById(id);
+        if (!existing) {
+            return res.status(404).json({ success: false, message: "Police Update not found." });
+        }
+        existing.update = update;
+        await existing.save();
+        return res.status(200).json({ success: true, message: "Police Update updated successfully." })
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+const deleteSafetyTipsController = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await safetyTipsModel.findByIdAndDelete(id);
+        return res.status(200).json({ success: true, message: "Safety tip deleted successfully." });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+const deleteUpdateTipsController = async (req, res) => {
+    try {
+        const { id } = req.params;
+        await updateTipsModel.findByIdAndDelete(id);
+        return res.status(200).json({ success: true, message: "Police update deleted successfully." });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
 
 module.exports = {
     fetchPhoneComplaintsController,
@@ -442,4 +528,10 @@ module.exports = {
     totalResolvedComplaintsController,
     recentComplaintsController,
     getPhoneComplaintAllocations,
+    addSafetyTipsController,
+    addUpdateTipsController,
+    updateSafetyTipsController,
+    updateUpdateTipsController,
+    deleteSafetyTipsController,
+    deleteUpdateTipsController,
 }

@@ -7,7 +7,7 @@ const policeComplaintSchema = new mongoose.Schema({
     required: true
   },
   cellComplaints: [{ type: mongoose.Schema.Types.ObjectId, ref: 'cellphonecomplaints' }],
-  laptopComplaints: [{ type: mongoose.Schema.Types.ObjectId, ref: 'laptopcomplaints' }],
+  laptopComplaints: [{ type: mongoose.Schema.Types.ObjectId, ref: 'laptopComplaints' }],
   bikeComplaints: [{ type: mongoose.Schema.Types.ObjectId, ref: 'bikecomplaints' }],
   carComplaints: [{ type: mongoose.Schema.Types.ObjectId, ref: 'carcomplaints' }],
   goldComplaints: [{ type: mongoose.Schema.Types.ObjectId, ref: 'goldcomplaints' }]

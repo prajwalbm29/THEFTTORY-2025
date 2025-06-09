@@ -1,4 +1,4 @@
-const { resolveComplaintController, changeComplaintStatusController } = require('../controllers/police')
+const { resolveComplaintController, changeComplaintStatusController, allotedComplaintsController, getResolvedComplaints, getUpdatesController } = require('../controllers/police')
 const { requireSignIn } = require('../middlewares/auth')
 
 const router = require('express').Router()
@@ -8,5 +8,10 @@ router.put('/change-complaint-status', requireSignIn, changeComplaintStatusContr
 router.get('/', (req, res) => {
     res.status(200).send('hello')
 })
+router.get('/alloted-complaints/:policeId', requireSignIn, allotedComplaintsController)
+
+router.get('/resolved-complaints/:policeId', requireSignIn, getResolvedComplaints);
+
+router.get('/get-updateTips', requireSignIn, getUpdatesController)
 
 module.exports = router

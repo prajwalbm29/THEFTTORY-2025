@@ -23,7 +23,7 @@ const policeDetailsController = async (req, res) => {
     try {
         const police = await policeModel.findOne({ policeId })
         if (!police || !police.hasAccess) {
-            return res.status(401).json({ success: false, message: "You have don't have access to the complaints." })
+            return res.status(401).json({ success: false, message: "You have don't have access to the Aplication." })
         }
         const { name, dob } = await aadhaarDetails.findOne({ aadhaarNo: police.aadhaarNo })
         return res.status(200).json({ success: true, message: "Details fetched successfully.", data: { name, dob, aadhaarNo: police.aadhaarNo } })
@@ -100,7 +100,7 @@ const verifyOTPController = async (req, res) => {
             isAdmin = true
         }
         const token = jwt.sign({ _id: aadhaarNo, isAdmin }, process.env.JWT_SECRET, { expiresIn: '7d' });
-        return res.status(200).json({ success: true, message: 'OTP verification successful.', token });
+        return res.status(200).json({ success: true, message: 'OTP verification successful.', token, _id: adminDetails._id });
     } catch (error) {
         console.error('failed to verify otp', error);
         return res.status(500).json({ success: false, message: error.message });

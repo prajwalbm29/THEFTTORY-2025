@@ -5,7 +5,7 @@ const carModel = require('../models/car');
 const goldModel = require('../models/gold');
 const aadhaarDetails = require('../models/aadhaarDetails');
 const nodemailer = require('nodemailer');
-const policeModel = require("../models/police");
+const safetyTipsModel = require('../models/safetyTips');
 const resolvedComplaintModel = require("../models/resolvedComplaints");
 const statusModel = require("../models/status");
 
@@ -460,6 +460,17 @@ const getAllComplaintsController = async (req, res) => {
     }
 };
 
+
+const getSafetyTipsController = async (req, res) => {
+    try {
+        const safetyTips = await safetyTipsModel.find({}, "tips").sort({ cretedAt: -1 })
+        return res.status(200).json({ success: true, message: "Safety tips fetched successfully", safetyTips });
+    } catch (error) {
+        console.error(error)
+        return res.status(500).json({ success: false, message: error.message })
+    }
+}
+
 module.exports = {
     cellComplaintController,
     laptopComplaintController,
@@ -478,5 +489,6 @@ module.exports = {
     laptopInvoiceController,
     goldPhotoController,
     sendUpdateMailController,
-    getAllComplaintsController
+    getAllComplaintsController,
+    getSafetyTipsController
 }
