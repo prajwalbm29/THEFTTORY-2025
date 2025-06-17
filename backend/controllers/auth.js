@@ -107,6 +107,32 @@ const verifyOTPController = async (req, res) => {
     }
 }
 
+// verify police OTP
+const verifyPoliceOTPController = async (req, res) => {
+    const { aadhaarNo, otp } = req.body;
+    try {
+        const otpData = await otpModel.findOne({ aadhaarNo });
+        if (!otpData) {
+            return res.status(404).json({ success: false, message: "Generate otp before verification." })
+        }
+        const isVerified = bcrypt.compareSync(otp, otpData.otp);
+        if (!isVerified || Date.now() > otpData.expiresAt.getTime()) {
+            return res.status(401).json({ success: false, message: "Invalid or expired OTP." })
+        }
+        const adminDetails = await adminModel.findOne({ aadhaarNo });
+        let isAdmin = false
+        if (adminDetails) {
+            isAdmin = true
+        }
+        const token = jwt.sign({ _id: aadhaarNo, isAdmin }, process.env.JWT_SECRET, { expiresIn: '7d' });
+        const { _id } = await policeModel.findOne({ aadhaarNo });
+        return res.status(200).json({ success: true, message: 'OTP verification successful.', token, _id });
+    } catch (error) {
+        console.error('failed to verify otp', error);
+        return res.status(500).json({ success: false, message: error.message });
+    }
+}
+
 // Admin login and registration
 const AdminRegisterController = async (req, res) => {
     const { aadhaarNo, password } = req.body;
@@ -150,5 +176,6 @@ module.exports = {
     verifyOTPController,
     AdminRegisterController,
     AdminLoginController,
-    policeDetailsController
+    policeDetailsController,
+    verifyPoliceOTPController
 }
