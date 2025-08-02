@@ -110,6 +110,7 @@ const Gold = () => {
           complaintId={selectedComplaintId}
           polices={polices}
           allocation={allocation}
+          type={'gold'}
           onClose={handleCloseModel}
         />
       )}

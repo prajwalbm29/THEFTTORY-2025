@@ -22,6 +22,10 @@ import Laptop from '../components/assignments/Laptop'
 import Bike from '../components/assignments/Bike'
 import Car from '../components/assignments/Car'
 import Gold from '../components/assignments/Gold'
+import ResolvedComplaints from '../pages/ResolvedComplaints'
+import ResolvedPhone from '../components/resolvedComplaints/ResolvedPhone'
+import ResolvedLaptop from '../components/resolvedComplaints/ResolvedLaptop'
+import ResolvedDetails from '../components/resolvedComplaints/ResolvedDetails'
 
 const router = createBrowserRouter([
     {
@@ -117,10 +121,28 @@ const router = createBrowserRouter([
             {
                 path: 'general-safety',
                 element: <GeneralSafety />
+            },
+            {
+                path: 'resolved-complaints',
+                element: <ResolvedComplaints/>,
+                children: [
+                    {
+                        path: 'phone',
+                        element: <ResolvedPhone />
+                    },
+                    {
+                        path: 'laptop',
+                        element: <ResolvedLaptop />
+                    },
+                    {
+                        path: ':type/:id',
+                        element: <ResolvedDetails />
+                    }
+                ]
             }
         ],
         errorElement: <PageNotFound />
     }
 ])
 
-export default router
+export default router 

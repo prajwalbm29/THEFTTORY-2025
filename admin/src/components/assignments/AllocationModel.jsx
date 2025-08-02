@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios';
 
-const AllocationModel = ({ complaintId, polices, allocation, onClose }) => {
+const AllocationModel = ({ complaintId, polices, allocation, type, onClose }) => {
     const [selected, setSelected] = useState([]);
 
     useEffect(() => {
-        const found = allocation.find(item => item.phoneComplaintId === complaintId);
+        const found = allocation.find(item => item[`${type}ComplaintId`] === complaintId);
         setSelected(found?.policeIds || []);
     }, [complaintId, allocation]);
 
     const togglePolice = async (policeId) => {
         try {
-            await axios.patch('/api/v1/admin/update-phone-allocation', { policeId, cellComplaintId: complaintId });
+            await axios.patch(`/api/v1/admin/update-${type}-allocation`, { policeId, complaintId });
 
             setSelected(prev =>
                 prev.includes(policeId)

@@ -112,6 +112,7 @@ const Laptop = () => {
           complaintId={selectedComplaintId}
           polices={polices}
           allocation={allocation}
+          type={'laptop'}
           onClose={handleCloseModel}
         />
       )}

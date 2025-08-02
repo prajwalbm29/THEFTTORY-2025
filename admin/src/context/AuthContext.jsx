@@ -38,8 +38,15 @@ const AuthProvider = ({ children }) => {
         checkAdmin()
     }
 
+    const logout = () => {
+        localStorage.removeItem('ACCESS_TOKEN');
+        axios.defaults.headers.common['Authorization'] = null;
+        setIsAdmin(false)
+        return true;
+    }
+
     return (
-        <AuthContext.Provider value={{isAdmin, login}}>
+        <AuthContext.Provider value={{isAdmin, login, logout}}>
             {children}
         </AuthContext.Provider>
     )

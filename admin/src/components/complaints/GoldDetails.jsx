@@ -11,9 +11,10 @@ const GoldDetails = () => {
 
   const getDetails = async () => {
     try {
-      const { data } = await axios.get(`/api/v1/complaint/car-details/${id}`);
+      const { data } = await axios.get(`/api/v1/complaint/gold-details/${id}`);
+      console.log(data)
       if (data?.success) {
-        setComplaint(data?.car);
+        setComplaint(data?.gold);
       }
     } catch (error) {
       console.error(error);
@@ -36,7 +37,7 @@ const GoldDetails = () => {
   const toggleVerification = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.patch(`/api/v1/admin/update-car-status/${id}`);
+      const { data } = await axios.patch(`/api/v1/admin/update-gold-status/${id}`);
       if (data?.success) {
         setComplaint((prev) => ({ ...prev, isVerified: !prev.isVerified }));
         toast.success(data?.message);
@@ -59,15 +60,11 @@ const GoldDetails = () => {
 
   return (
     <div className="max-w-2xl mx-auto mt-10 mb-10 p-6 bg-white rounded-xl shadow-lg space-y-4 border">
-      <h2 className="text-2xl font-semibold text-center mb-4">🚗 Car Complaint Details</h2>
+      <h2 className="text-2xl font-semibold text-center mb-4"> Gold Complaint Details</h2>
       <div className="space-y-2 text-gray-700">
-        <p><strong>Registration Number:</strong> {complaint.registrationNo}</p>
-        <p><strong>Chasis Number:</strong> {complaint.chasisNo}</p>
-        <p><strong>Engine Number:</strong> {complaint.engineNo}</p>
-        <p><strong>Brand:</strong> {complaint.brand}</p>
-        <p><strong>Model:</strong> {complaint.model}</p>
-        <p><strong>Color:</strong> {complaint.color}</p>
-        <p><strong>Description:</strong> {complaint.description}</p>
+        <p><strong>Weight in grams:</strong> {complaint.weight}</p>
+        <p><strong>Unique Feature:</strong> {complaint.uniqueFeature}</p>
+        <p><strong>Witness:</strong> {complaint.witness}</p>
         <hr />
         <p><strong>Lost Location:</strong> {complaint.lostLocation}</p>
         <p><strong>Lost Description:</strong> {complaint.lostDescription}</p>

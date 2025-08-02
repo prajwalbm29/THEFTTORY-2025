@@ -116,6 +116,7 @@ const Car = () => {
           complaintId={selectedComplaintId}
           polices={polices}
           allocation={allocation}
+          type={'car'}
           onClose={handleCloseModel}
         />
       )}

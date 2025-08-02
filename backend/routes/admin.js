@@ -28,7 +28,18 @@ const {
     deleteUpdateTipsController,
     deleteSafetyTipsController,
     addSafetyTipsController,
-    addUpdateTipsController
+    addUpdateTipsController,
+    resolvedComplaintCountController,
+    resolvedPhoneComplaintController,
+    resolvedLaptopComplaintController,
+    resolvedBikeComplaintController,
+    resolvedCarComplaintController,
+    resolvedGoldComplaintController,
+    getLaptopComplaintAllocations,
+    getBikeComplaintAllocations,
+    getCarComplaintAllocations,
+    getGoldComplaintAllocations,
+    sendNotificationMailController
 } = require('../controllers/admin')
 const { requireSignIn, isAdmin } = require('../middlewares/auth')
 
@@ -64,10 +75,10 @@ router.get('/recent-complaints', recentComplaintsController)
 
 // complaint allocation
 router.get('/get-phone-complaint-allocation', requireSignIn, isAdmin, getPhoneComplaintAllocations)
-router.get('/get-laptop-complaint-allocation', requireSignIn, isAdmin, getPhoneComplaintAllocations)
-router.get('/get-bike-complaint-allocation', requireSignIn, isAdmin, getPhoneComplaintAllocations)
-router.get('/get-car-complaint-allocation', requireSignIn, isAdmin, getPhoneComplaintAllocations)
-router.get('/get-gold-complaint-allocation', requireSignIn, isAdmin, getPhoneComplaintAllocations)
+router.get('/get-laptop-complaint-allocation', requireSignIn, isAdmin, getLaptopComplaintAllocations)
+router.get('/get-bike-complaint-allocation', requireSignIn, isAdmin, getBikeComplaintAllocations)
+router.get('/get-car-complaint-allocation', requireSignIn, isAdmin, getCarComplaintAllocations)
+router.get('/get-gold-complaint-allocation', requireSignIn, isAdmin, getGoldComplaintAllocations)
 
 // Updates and safety tips
 router.post('/add-safetyTips', requireSignIn, isAdmin, addSafetyTipsController)
@@ -77,5 +88,16 @@ router.delete('/delete-safetyTips/:id', requireSignIn, isAdmin, deleteSafetyTips
 router.post('/add-updateTips', requireSignIn, isAdmin, addUpdateTipsController)
 router.put('/update-updateTips/:id', requireSignIn, isAdmin, updateUpdateTipsController)
 router.delete('/delete-updateTips/:id', requireSignIn, isAdmin, deleteUpdateTipsController)
+
+// resolved complaints
+router.get('/resolved-complaints-count', requireSignIn, isAdmin, resolvedComplaintCountController)
+router.get('/resolved-phone-complaints', requireSignIn, isAdmin, resolvedPhoneComplaintController)
+router.get('/resolved-laptop-complaints', requireSignIn, isAdmin, resolvedLaptopComplaintController)
+router.get('/resolved-bike-complaints', requireSignIn, isAdmin, resolvedBikeComplaintController)
+router.get('/resolved-car-complaints', requireSignIn, isAdmin, resolvedCarComplaintController)
+router.get('/resolved-gold-complaints', requireSignIn, isAdmin, resolvedGoldComplaintController)
+
+// send notification mail
+router.post('/send-notification-mail', requireSignIn, isAdmin, sendNotificationMailController)
 
 module.exports = router

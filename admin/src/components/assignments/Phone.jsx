@@ -112,6 +112,7 @@ const Phone = () => {
           complaintId={selectedComplaintId}
           polices={polices}
           allocation={allocation}
+          type={'phone'}
           onClose={handleCloseModel}
         />
       )}
